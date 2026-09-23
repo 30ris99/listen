@@ -57,8 +57,13 @@ class AudioRecorderService(
                 lastRecorderStateCheck = System.currentTimeMillis()
                 
                 mediaRecorder = MediaRecorder().apply {
-                    // Use microphone directly for ambient audio recording
-                    setAudioSource(MediaRecorder.AudioSource.MIC)
+                    // OpenClaw fork: VOICE_RECOGNITION profile tuned for speech/STT
+                    // (falls back to MIC automatically if the device rejects it)
+                    try {
+                        setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION)
+                    } catch (_: Exception) {
+                        setAudioSource(MediaRecorder.AudioSource.MIC)
+                    }
                     setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                     setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                     setAudioSamplingRate(audioSampleRate)
