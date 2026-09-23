@@ -106,6 +106,8 @@ class ListenForegroundService : Service() {
         const val ACTION_UPDATE_SETTINGS = "com.romp.listen.app.ACTION_UPDATE_SETTINGS"
         const val ACTION_PAUSE_RECORDING_FOR_PLAYBACK = "com.romp.listen.app.ACTION_PAUSE_RECORDING_FOR_PLAYBACK"
         const val ACTION_RESUME_RECORDING_AFTER_PLAYBACK = "com.romp.listen.app.ACTION_RESUME_RECORDING_AFTER_PLAYBACK"
+        // OpenClaw fork: toggled by the home-screen widget
+        const val ACTION_TOGGLE_RECORDING = "com.romp.listen.app.ACTION_TOGGLE_RECORDING"
         
         // Auto music mode heuristics
         private const val AUTO_MUSIC_POLL_INTERVAL_MS = 100L
@@ -183,6 +185,12 @@ class ListenForegroundService : Service() {
             val dir = if (isCall) currentCallDirection else null
             val num = if (isCall) currentCallNumber else null
             segmentManager.addSegment(file, startTime, duration, isCall, dir, num)
+            // OpenClaw fork: enqueue upload of the closed segment to the PC backend
+            try {
+                com.romp.listen.app.worker.UploadWorker.enqueue(this, file)
+            } catch (e: Exception) {
+                AppLog.w(TAG, "Failed to enqueue upload", e)
+            }
             // Record rotation performance
             performanceMonitor?.recordSegmentRotation(duration)
             // Update notification content subtly to show recent rotation
@@ -218,6 +226,19 @@ class ListenForegroundService : Service() {
         AppLog.d(TAG, "Service started")
         
         when (intent?.action) {
+            ACTION_TOGGLE_RECORDING -> {
+                // OpenClaw fork: home-screen widget toggle
+                val prefs = SettingsManager(this)
+                if (prefs.isServiceEnabled) {
+                    prefs.isServiceEnabled = false
+                    stopSelf()
+                } else {
+                    prefs.isServiceEnabled = true
+                    start(this)
+                }
+                com.romp.listen.app.widget.ListenWidgetProvider.refresh(this)
+                return START_STICKY
+            }
             ACTION_UPDATE_SETTINGS -> {
                 AppLog.d(TAG, "Applying updated settings to recorder")
                 updateAudioSettings()
@@ -491,6 +512,10 @@ class ListenForegroundService : Service() {
             putExtra(EXTRA_ELAPSED_MS, audioRecorder.getCurrentRecordingDuration())
         }
         sendBroadcast(intent)
+        // OpenClaw fork: keep the home-screen widget in sync
+        try {
+            com.romp.listen.app.widget.ListenWidgetProvider.refresh(this)
+        } catch (_: Exception) { }
     }
     
     /** Schedule periodic segment rotation using WorkManager (legacy, not used for <15 min) */

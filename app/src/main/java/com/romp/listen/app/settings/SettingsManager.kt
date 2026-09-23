@@ -99,6 +99,27 @@ class SettingsManager(context: Context) {
     var showNotification: Boolean
         get() = prefs.getBoolean(KEY_SHOW_NOTIFICATION, true)
         set(value) = prefs.edit { putBoolean(KEY_SHOW_NOTIFICATION, value) }
+
+    // ---- OpenClaw upload (fork) ----
+    /** Upload endpoint URL (FastAPI /ingest/audio, via Tailscale) */
+    var uploadEndpointUrl: String
+        get() = prefs.getString(KEY_UPLOAD_URL, DEFAULT_UPLOAD_URL) ?: DEFAULT_UPLOAD_URL
+        set(value) = prefs.edit { putString(KEY_UPLOAD_URL, value) }
+
+    /** Shared secret sent as x-ingest-secret header */
+    var uploadSecret: String
+        get() = prefs.getString(KEY_UPLOAD_SECRET, DEFAULT_UPLOAD_SECRET) ?: DEFAULT_UPLOAD_SECRET
+        set(value) = prefs.edit { putString(KEY_UPLOAD_SECRET, value) }
+
+    /** Upload also on mobile data (WiFi+5G). False = WiFi only */
+    var uploadOnMobileData: Boolean
+        get() = prefs.getBoolean(KEY_UPLOAD_MOBILE, true)
+        set(value) = prefs.edit { putBoolean(KEY_UPLOAD_MOBILE, value) }
+
+    /** Upload only while charging */
+    var uploadOnlyWhenCharging: Boolean
+        get() = prefs.getBoolean(KEY_UPLOAD_CHARGING, false)
+        set(value) = prefs.edit { putBoolean(KEY_UPLOAD_CHARGING, value) }
     
     /** Whether user has consented to audio recording */
     var hasUserConsentedToRecording: Boolean
@@ -165,14 +186,20 @@ class SettingsManager(context: Context) {
         private const val KEY_POWER_SAVING_MODE = "power_saving_mode"
         private const val KEY_ADAPTIVE_PERFORMANCE = "adaptive_performance"
         private const val KEY_SHOW_NOTIFICATION = "show_notification"
+        private const val KEY_UPLOAD_URL = "upload_endpoint_url"
+        private const val KEY_UPLOAD_SECRET = "upload_secret"
+        private const val KEY_UPLOAD_MOBILE = "upload_on_mobile_data"
+        private const val KEY_UPLOAD_CHARGING = "upload_only_when_charging"
         private const val KEY_USER_CONSENTED_TO_RECORDING = "user_consented_to_recording"
         private const val KEY_CUSTOM_STORAGE_DIRECTORY = "custom_storage_directory"
         
         // Default values
-        const val DEFAULT_SEGMENT_DURATION = 120 // 2 minutes (changed from 60)
-        const val DEFAULT_RETENTION_PERIOD = 720 // 12 hours (changed from 10 minutes)
-        const val DEFAULT_MAX_STORAGE = 10240 // 10 GB (changed from 100 MB)
-        const val AUTO_MUSIC_TARGET_SECONDS = 300 // ~5 minutes
+        const val DEFAULT_SEGMENT_DURATION = 600 // 10 minutes (openclaw fork)
+        const val DEFAULT_RETENTION_PERIOD = 10080 // 7 days (openclaw fork)
+        const val DEFAULT_MAX_STORAGE = 4096 // 4 GB (openclaw fork)
+        const val AUTO_MUSIC_TARGET_SECONDS = 600 // ~10 minutes (openclaw fork)
+        const val DEFAULT_UPLOAD_URL = "http://100.121.206.47:8000/ingest/audio"
+        const val DEFAULT_UPLOAD_SECRET = "40ca4bfed834ab3df0807c2ae27f949d1e966c0b2a9330ec"
     }
 }
 

@@ -158,4 +158,9 @@
     <string name="msg_delete_error">Error deleting recording</string>
     <string name="msg_delete_all_error">Error clearing recordings</string>
     <string name="msg_delete_rotating_error">Error clearing rotating recordings</string>
+
+    <!-- OpenClaw fork: upload + widget -->
+    <string name="widget_description">Listen recording toggle</string>
+    <string name="widget_start">AVVIA</string>
+    <string name="widget_stop">PAUSA</string>
 </resources> 

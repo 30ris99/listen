@@ -32,6 +32,10 @@ class SettingsActivity : AppCompatActivity() {
 		val swPowerSaving: Switch = findViewById(R.id.sw_power_saving)
 		val swAdaptive: Switch = findViewById(R.id.sw_adaptive)
 		val swAutoMusic: Switch = findViewById(R.id.sw_auto_music)
+		val etUploadUrl: EditText = findViewById(R.id.et_upload_url)
+		val etUploadSecret: EditText = findViewById(R.id.et_upload_secret)
+		val swUploadMobile: Switch = findViewById(R.id.sw_upload_mobile)
+		val swUploadCharging: Switch = findViewById(R.id.sw_upload_charging)
 		val btnSave: Button = findViewById(R.id.btn_save_settings)
 		
 		// Pre-fill current values
@@ -42,6 +46,10 @@ class SettingsActivity : AppCompatActivity() {
 		swPowerSaving.isChecked = settings.powerSavingModeEnabled
 		swAdaptive.isChecked = settings.adaptivePerformanceEnabled
 		swAutoMusic.isChecked = settings.autoMusicModeEnabled
+		etUploadUrl.setText(settings.uploadEndpointUrl)
+		etUploadSecret.setText(settings.uploadSecret)
+		swUploadMobile.isChecked = settings.uploadOnMobileData
+		swUploadCharging.isChecked = settings.uploadOnlyWhenCharging
 		
 		// Set current audio quality preset
 		when (settings.audioQualityPreset) {
@@ -65,6 +73,11 @@ class SettingsActivity : AppCompatActivity() {
 			swPowerSaving.isChecked.also { settings.powerSavingModeEnabled = it }
 			swAdaptive.isChecked.also { settings.adaptivePerformanceEnabled = it }
 			swAutoMusic.isChecked.also { settings.autoMusicModeEnabled = it }
+			val url = etUploadUrl.text.toString().trim()
+			if (url.isNotBlank()) settings.uploadEndpointUrl = url
+			settings.uploadSecret = etUploadSecret.text.toString().trim()
+			swUploadMobile.isChecked.also { settings.uploadOnMobileData = it }
+			swUploadCharging.isChecked.also { settings.uploadOnlyWhenCharging = it }
 			
 			// Save audio quality preset
 			val selectedQuality = when (rgAudioQuality.checkedRadioButtonId) {
