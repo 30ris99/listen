@@ -154,6 +154,14 @@
             android:layout_marginTop="16dp"
             android:text="@string/btn_settings" />
 
+        <Button
+            android:id="@+id/btn_preview"
+            style="@style/Widget.Listen.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Anteprima trascrizioni" />
+
     </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

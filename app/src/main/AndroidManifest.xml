@@ -52,6 +52,12 @@
             android:exported="false"
             android:theme="@style/Theme.Listen" />
 
+        <!-- OpenClaw fork: anteprima trascrizioni -->
+        <activity
+            android:name=".ui.PreviewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Listen" />
+
         <!-- Foreground Service for audio recording -->
         <service
             android:name=".service.ListenForegroundService"

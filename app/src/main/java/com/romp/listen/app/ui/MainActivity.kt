@@ -258,6 +258,12 @@ class MainActivity : AppCompatActivity() {
         binding.btnSettings.setOnClickListener {
             openSettings()
         }
+
+        // OpenClaw fork: anteprima trascrizioni (viewBinding per il nuovo bottone
+        // aggiunto via findViewById per non toccare il binding generato)
+        findViewById<android.widget.Button>(R.id.btn_preview)?.setOnClickListener {
+            startActivity(Intent(this, PreviewActivity::class.java))
+        }
         
         AppLog.d(TAG, "MainActivity UI setup completed")
     }
