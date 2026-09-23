@@ -227,17 +227,39 @@ class ListenForegroundService : Service() {
         
         when (intent?.action) {
             ACTION_TOGGLE_RECORDING -> {
-                // OpenClaw fork: home-screen widget toggle
+                // OpenClaw fork: home-screen widget toggle.
+                // Se il service era spento, va comunque portato in foreground
+                // prima di qualsiasi stop (altrimenti Android 14+ lancia
+                // ForegroundServiceDidNotStartInTimeException e crash-loop).
                 val prefs = SettingsManager(this)
                 if (prefs.isServiceEnabled) {
                     prefs.isServiceEnabled = false
+                    prefs.wasRecordingOnShutdown = false
+                    try {
+                        startForegroundService()
+                    } catch (_: Exception) { }
+                    try {
+                        stopRecording()
+                    } catch (_: Exception) { }
+                    isServiceRunning = false
                     stopSelf()
-                } else {
-                    prefs.isServiceEnabled = true
-                    start(this)
+                    try {
+                        com.romp.listen.app.widget.ListenWidgetProvider.refresh(this)
+                    } catch (_: Exception) { }
+                    return START_STICKY
                 }
-                com.romp.listen.app.widget.ListenWidgetProvider.refresh(this)
-                return START_STICKY
+                // Accensione: se il service è già vivo riparte la registrazione,
+                // altrimenti prosegue con l'avvio normale qui sotto.
+                prefs.isServiceEnabled = true
+                if (isServiceRunning) {
+                    try {
+                        if (startRecording()) broadcastStatus()
+                    } catch (_: Exception) { }
+                    try {
+                        com.romp.listen.app.widget.ListenWidgetProvider.refresh(this)
+                    } catch (_: Exception) { }
+                    return START_STICKY
+                }
             }
             ACTION_UPDATE_SETTINGS -> {
                 AppLog.d(TAG, "Applying updated settings to recorder")
